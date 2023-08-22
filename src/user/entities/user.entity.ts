@@ -1,4 +1,5 @@
 import { Status, TypeUsers } from 'src/constants/roles';
+import { Grade } from 'src/grade/entities/grade.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -31,6 +32,21 @@ export class User {
 
   @Column('text', {
     nullable: false,
+  })
+  dni: string;
+
+  @Column('text', {
+    nullable: false,
+  })
+  phone: string;
+
+  @Column('text', {
+    nullable: false,
+  })
+  address: string;
+
+  @Column('text', {
+    nullable: false,
     select: false,
   })
   password: string;
@@ -50,6 +66,10 @@ export class User {
   @OneToOne(() => User)
   @JoinColumn({ name: 'children_id' })
   children: User;
+
+  @OneToOne(() => Grade)
+  @JoinColumn({ name: 'grade_id' })
+  grade: Grade;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

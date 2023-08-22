@@ -11,7 +11,7 @@ import { Status } from 'src/constants/roles';
 
 @Injectable()
 export class ClassroomService {
-  private service = 'UserService';
+  private service = 'ClassroomService';
 
   constructor(
     @InjectRepository(Classroom)

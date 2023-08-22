@@ -12,7 +12,7 @@ import { PaginationDto } from 'src/helpers/dtos/pagination.dto';
 
 @Injectable()
 export class AcademicStructureService {
-  private service = 'UserService';
+  private service = 'AcademicStructureService';
 
   constructor(
     @InjectRepository(AcademicStructure)
@@ -50,7 +50,7 @@ export class AcademicStructureService {
           status: Status.ACTIVO,
           id,
         },
-        relations: ['subject'],
+        relations: ['structureGrade', 'structureGrade.subject'],
       });
       if (!academicStruc) throw new NotFoundException('Malla not found');
       return academicStruc;
@@ -97,12 +97,12 @@ export class AcademicStructureService {
     addSubjectToStructureDto: AddSubjectToStructureDto,
   ) {
     try {
-      const { structure, subject } = addSubjectToStructureDto;
+      /* const { structure, subject } = addSubjectToStructureDto;
       const subjectObject = await this.subjectService.findOne(subject);
       const structureObject = await this.findOne(structure);
-      structureObject.subject.push(subjectObject);
+      structureObject..subject.push(subjectObject);
       await this.academicRepository.save(structureObject);
-      return structureObject;
+      return structureObject; */
     } catch (error) {
       SendError(this.service, error);
     }

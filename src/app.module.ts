@@ -11,6 +11,8 @@ import { CourseModule } from './course/course.module';
 import { AuthModule } from './auth/auth.module';
 import { AcademicStructureModule } from './academic-structure/academic-structure.module';
 import { ClassroomModule } from './classroom/classroom.module';
+import { StructureGradeModule } from './structure-grade/structure-grade.module';
+import { GradeModule } from './grade/grade.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -36,6 +38,8 @@ import { ClassroomModule } from './classroom/classroom.module';
     AuthModule,
     AcademicStructureModule,
     ClassroomModule,
+    StructureGradeModule,
+    GradeModule,
   ],
 })
 export class AppModule {}

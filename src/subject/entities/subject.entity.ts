@@ -1,5 +1,5 @@
-import { AcademicStructure } from 'src/academic-structure/entities/academic-structure.entity';
 import { Status } from 'src/constants/roles';
+import { StructureGrade } from 'src/structure-grade/entities/structure-grade.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -35,11 +35,8 @@ export class Subject {
   })
   hourPerWeek: number;
 
-  @ManyToMany(
-    () => AcademicStructure,
-    (academicStructure) => academicStructure.subject,
-  )
-  academicStructure: AcademicStructure[];
+  @ManyToMany(() => StructureGrade, (structureGrade) => structureGrade.subject)
+  structureGrade: StructureGrade[];
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

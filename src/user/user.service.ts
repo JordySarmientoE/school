@@ -34,6 +34,7 @@ export class UserService {
       createUserDto.password = password;
       const user = this.userRepository.create({ ...createUserDto, role });
       await this.userRepository.save(user);
+      delete user.password;
       return user;
     } catch (error) {
       SendError(this.service, error);
@@ -122,7 +123,7 @@ export class UserService {
     }
     const user = await this.userRepository.findOne({
       where,
-      relations: ['children'],
+      relations: ['children', 'grade'],
     });
     if (!user) throw new NotFoundException('User Not Found');
     return user;
