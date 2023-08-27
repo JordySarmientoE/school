@@ -15,6 +15,7 @@ import { PaginationDto } from 'src/helpers/dtos/pagination.dto';
 import { UUIDDto } from 'src/helpers/dtos/uuid.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { TypeUsers } from 'src/constants/roles';
+import { AssignGradeDto } from './dto/assign-grade.dto';
 
 @Auth(TypeUsers.ADMIN)
 @Controller('student')
@@ -44,5 +45,10 @@ export class TeacherController {
   @Delete(':id')
   remove(@Param() params: UUIDDto) {
     return this.studentService.remove(params.id);
+  }
+
+  @Post('assign-grade')
+  assignGrade(@Body() assignGradeDto: AssignGradeDto) {
+    return this.studentService.assignGrade(assignGradeDto);
   }
 }

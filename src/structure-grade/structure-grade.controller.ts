@@ -3,14 +3,19 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { StructureGradeService } from './structure-grade.service';
 import { CreateStructureGradeDto } from './dto/create-structure-grade.dto';
-import { UpdateStructureGradeDto } from './dto/update-structure-grade.dto';
+import { AddSubjectToStructureDto } from './dto/add-subject-to-structure.dto';
+import { PaginationDto } from 'src/helpers/dtos/pagination.dto';
+import { UUIDDto } from 'src/helpers/dtos/uuid.dto';
+import { TypeUsers } from 'src/constants/roles';
+import { Auth } from 'src/auth/decorators/auth.decorator';
 
+@Auth(TypeUsers.ADMIN)
 @Controller('structure-grade')
 export class StructureGradeController {
   constructor(private readonly structureGradeService: StructureGradeService) {}
@@ -21,25 +26,26 @@ export class StructureGradeController {
   }
 
   @Get()
-  findAll() {
-    return this.structureGradeService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.structureGradeService.findAll(paginationDto);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.structureGradeService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateStructureGradeDto: UpdateStructureGradeDto,
-  ) {
-    return this.structureGradeService.update(+id, updateStructureGradeDto);
+  findOne(@Param() params: UUIDDto) {
+    return this.structureGradeService.findOne(params.id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.structureGradeService.remove(+id);
+  remove(@Param() params: UUIDDto) {
+    return this.structureGradeService.remove(params.id);
+  }
+
+  @Post('add-subject')
+  addSubjectsToStructure(
+    @Body() addSubjectToStructureDto: AddSubjectToStructureDto,
+  ) {
+    return this.structureGradeService.addSubjectsToStructure(
+      addSubjectToStructureDto,
+    );
   }
 }

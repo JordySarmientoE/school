@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -13,6 +13,7 @@ import { SendError } from 'src/helpers/error';
 import { encrypt } from 'src/helpers/bcrypt';
 import { PaginationDto } from 'src/helpers/dtos/pagination.dto';
 import { SearchUser } from './interfaces/search-user';
+import { Grade } from 'src/grade/entities/grade.entity';
 
 @Injectable()
 export class UserService {
@@ -32,7 +33,13 @@ export class UserService {
       if (userByEmail) throw new BadRequestException('Email was taken');
       const password = await encrypt(createUserDto.password);
       createUserDto.password = password;
-      const user = this.userRepository.create({ ...createUserDto, role });
+      const status =
+        role === TypeUsers.STUDENT ? Status.NO_MATRICULADO : Status.ACTIVO;
+      const user = this.userRepository.create({
+        ...createUserDto,
+        role,
+        status,
+      });
       await this.userRepository.save(user);
       delete user.password;
       return user;
@@ -83,7 +90,7 @@ export class UserService {
       const user = await this.userRepository.findOne({
         where: {
           email: emailFormatted,
-          status: Status.ACTIVO,
+          status: In[(Status.ACTIVO, Status.NO_MATRICULADO)],
         },
         select: {
           email: true,
@@ -100,7 +107,7 @@ export class UserService {
   async findAll(paginationDto: PaginationDto, role?: TypeUsers) {
     const { limit = 10, offset = 0 } = paginationDto;
     const where: SearchUser = {
-      status: Status.ACTIVO,
+      status: In[(Status.ACTIVO, Status.NO_MATRICULADO)],
     };
     if (role) {
       where.role = role;
@@ -115,7 +122,7 @@ export class UserService {
 
   async findOne(id: string, role?: TypeUsers) {
     const where: any = {
-      status: Status.ACTIVO,
+      status: In[(Status.ACTIVO, Status.NO_MATRICULADO)],
       id,
     };
     if (role) {
@@ -130,13 +137,24 @@ export class UserService {
   }
 
   async assignStudent(student: string, parent: string) {
-    const estudiante = await this.findOne(student, TypeUsers.STUDENT);
-    const padre = await this.findOne(parent, TypeUsers.PARENT);
+    const [estudiante, padre] = await Promise.all([
+      this.findOne(student, TypeUsers.STUDENT),
+      this.findOne(student, TypeUsers.STUDENT),
+    ]);
     const asignacion = await this.userRepository.preload({
       id: parent,
       children: estudiante,
     });
     await this.userRepository.save(asignacion);
     return padre;
+  }
+
+  async assignGrade(student: string, grade: Grade) {
+    const user = await this.userRepository.preload({
+      id: student,
+      grade,
+    });
+    await this.userRepository.save(user);
+    return user;
   }
 }

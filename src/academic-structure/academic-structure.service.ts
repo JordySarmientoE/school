@@ -6,8 +6,6 @@ import { Repository } from 'typeorm';
 import { AcademicStructure } from './entities/academic-structure.entity';
 import { SendError } from 'src/helpers/error';
 import { Status } from 'src/constants/roles';
-import { SubjectService } from 'src/subject/subject.service';
-import { AddSubjectToStructureDto } from './dto/add-subject-to-structure.dto';
 import { PaginationDto } from 'src/helpers/dtos/pagination.dto';
 
 @Injectable()
@@ -17,7 +15,6 @@ export class AcademicStructureService {
   constructor(
     @InjectRepository(AcademicStructure)
     private readonly academicRepository: Repository<AcademicStructure>,
-    private readonly subjectService: SubjectService,
   ) {}
 
   async create(createAcademicStructureDto: CreateAcademicStructureDto) {
@@ -88,21 +85,6 @@ export class AcademicStructureService {
         status: 'OK',
         msg: 'Malla curricular removida',
       };
-    } catch (error) {
-      SendError(this.service, error);
-    }
-  }
-
-  async addSubjectsToStructure(
-    addSubjectToStructureDto: AddSubjectToStructureDto,
-  ) {
-    try {
-      /* const { structure, subject } = addSubjectToStructureDto;
-      const subjectObject = await this.subjectService.findOne(subject);
-      const structureObject = await this.findOne(structure);
-      structureObject..subject.push(subjectObject);
-      await this.academicRepository.save(structureObject);
-      return structureObject; */
     } catch (error) {
       SendError(this.service, error);
     }

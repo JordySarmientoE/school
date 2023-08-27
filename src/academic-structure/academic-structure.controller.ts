@@ -14,7 +14,6 @@ import { UpdateAcademicStructureDto } from './dto/update-academic-structure.dto'
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { TypeUsers } from 'src/constants/roles';
 import { UUIDDto } from 'src/helpers/dtos/uuid.dto';
-import { AddSubjectToStructureDto } from './dto/add-subject-to-structure.dto';
 import { PaginationDto } from 'src/helpers/dtos/pagination.dto';
 
 @Auth(TypeUsers.ADMIN)
@@ -53,14 +52,5 @@ export class AcademicStructureController {
   @Delete(':id')
   remove(@Param() params: UUIDDto) {
     return this.academicStructureService.remove(params.id);
-  }
-
-  @Post('add-subject')
-  addSubjectsToStructure(
-    @Body() addSubjectToStructureDto: AddSubjectToStructureDto,
-  ) {
-    return this.academicStructureService.addSubjectsToStructure(
-      addSubjectToStructureDto,
-    );
   }
 }

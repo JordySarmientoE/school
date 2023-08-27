@@ -6,14 +6,14 @@ import {
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Subject } from './entities/subject.entity';
 import { SendError } from 'src/helpers/error';
 import { Status } from 'src/constants/roles';
 
 @Injectable()
 export class SubjectService {
-  private service = 'UserService';
+  private service = 'SubjectService';
 
   constructor(
     @InjectRepository(Subject)
@@ -103,6 +103,22 @@ export class SubjectService {
         status: 'OK',
         msg: 'Materia removida',
       };
+    } catch (error) {
+      SendError(this.service, error);
+    }
+  }
+
+  async getSubjects(ids: string[], validateLength = false) {
+    try {
+      const subjects = await this.subjectRepository.find({
+        where: {
+          status: Status.ACTIVO,
+          id: In(ids),
+        },
+      });
+      if (validateLength && subjects.length !== ids.length)
+        throw new BadRequestException('Existe uno o mas cursos erroneos');
+      return subjects;
     } catch (error) {
       SendError(this.service, error);
     }

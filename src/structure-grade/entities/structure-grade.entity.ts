@@ -7,19 +7,21 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
-  OneToMany,
   PrimaryGeneratedColumn,
+  OneToOne,
+  JoinColumn,
+  ManyToOne,
 } from 'typeorm';
+import { Grade } from 'src/grade/entities/grade.entity';
 
 @Entity()
 export class StructureGrade {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('integer', {
-    nullable: false,
-  })
-  grade: number;
+  @OneToOne(() => Grade)
+  @JoinColumn({ name: 'grade_id' })
+  grade: Grade;
 
   @Column('text', {
     nullable: false,
@@ -33,7 +35,7 @@ export class StructureGrade {
   @JoinTable()
   subject: Subject[];
 
-  @OneToMany(
+  @ManyToOne(
     () => AcademicStructure,
     (academicStructure) => academicStructure.structureGrade,
   )

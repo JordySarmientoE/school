@@ -3,6 +3,7 @@ export enum Status {
   INACTIVO = 'INACTIVO',
   ASISTIO = 'ASISTIO',
   AUSENTE = 'AUSENTE',
+  NO_MATRICULADO = 'NO MATRICULADO',
 }
 
 export enum TypeUsers {

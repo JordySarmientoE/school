@@ -36,7 +36,7 @@ export class GradeService {
 
   async findOne(id: string) {
     try {
-      const grade = this.gradeRepository.find({
+      const grade = await this.gradeRepository.findOne({
         where: {
           id,
         },
