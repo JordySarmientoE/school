@@ -1,3 +1,4 @@
+import { Classroom } from 'src/classroom/entities/classroom.entity';
 import { Status } from 'src/constants/roles';
 import { StructureGrade } from 'src/structure-grade/entities/structure-grade.entity';
 import { User } from 'src/user/entities/user.entity';
@@ -5,7 +6,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -25,11 +26,14 @@ export class Grade {
   })
   status?: string;
 
-  @OneToOne(() => User, (user) => user.grade)
-  user: User;
+  @OneToMany(() => User, (user) => user.grade)
+  user: User[];
 
-  @OneToOne(() => StructureGrade, (structureGrade) => structureGrade.grade)
-  academicStructure: StructureGrade;
+  @OneToMany(() => StructureGrade, (structureGrade) => structureGrade.grade)
+  academicStructure: StructureGrade[];
+
+  @OneToMany(() => Classroom, (classroom) => classroom.grade)
+  classroom: Classroom[];
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

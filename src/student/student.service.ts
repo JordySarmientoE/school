@@ -75,4 +75,15 @@ export class StudentService {
       SendError(this.service, error);
     }
   }
+
+  async getStudents(ids: string[], validateLength = false) {
+    try {
+      const students = await this.userService.getStudents(ids);
+      if (validateLength && ids.length !== students.length)
+        throw new BadRequestException('Some students not found');
+      return students;
+    } catch (error) {
+      SendError(this.service, error);
+    }
+  }
 }

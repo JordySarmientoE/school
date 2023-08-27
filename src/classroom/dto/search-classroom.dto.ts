@@ -1,13 +1,12 @@
 import { Type } from 'class-transformer';
-import { IsString, IsNumber, IsOptional, IsIn } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsIn, IsUUID } from 'class-validator';
 import { Status } from 'src/constants/roles';
 import { PaginationDto } from 'src/helpers/dtos/pagination.dto';
 
 export class SearchClassroomDto extends PaginationDto {
   @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  grade?: number;
+  @IsUUID('4')
+  grade?: string;
 
   @IsOptional()
   @IsString()

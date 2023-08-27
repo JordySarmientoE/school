@@ -1,3 +1,4 @@
+import { Classroom } from 'src/classroom/entities/classroom.entity';
 import { Status, TypeUsers } from 'src/constants/roles';
 import { Grade } from 'src/grade/entities/grade.entity';
 import {
@@ -8,6 +9,7 @@ import {
   UpdateDateColumn,
   OneToOne,
   JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 
 @Entity()
@@ -67,9 +69,13 @@ export class User {
   @JoinColumn({ name: 'children_id' })
   children: User;
 
-  @OneToOne(() => Grade)
+  @ManyToOne(() => Grade)
   @JoinColumn({ name: 'grade_id' })
   grade: Grade;
+
+  @ManyToOne(() => Classroom)
+  @JoinColumn({ name: 'classroom_id' })
+  classroom: Classroom;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

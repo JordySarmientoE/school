@@ -15,7 +15,7 @@ import { UUIDDto } from 'src/helpers/dtos/uuid.dto';
 import { TypeUsers } from 'src/constants/roles';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 
-@Auth(TypeUsers.ADMIN)
+//@Auth(TypeUsers.ADMIN)
 @Controller('structure-grade')
 export class StructureGradeController {
   constructor(private readonly structureGradeService: StructureGradeService) {}

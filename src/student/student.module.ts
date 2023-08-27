@@ -9,5 +9,6 @@ import { GradeModule } from 'src/grade/grade.module';
   controllers: [TeacherController],
   providers: [StudentService],
   imports: [UserModule, AuthModule, GradeModule],
+  exports: [StudentService],
 })
 export class StudentModule {}

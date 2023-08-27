@@ -8,7 +8,6 @@ import {
   JoinTable,
   ManyToMany,
   PrimaryGeneratedColumn,
-  OneToOne,
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
@@ -19,7 +18,7 @@ export class StructureGrade {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => Grade)
+  @ManyToOne(() => Grade)
   @JoinColumn({ name: 'grade_id' })
   grade: Grade;
 

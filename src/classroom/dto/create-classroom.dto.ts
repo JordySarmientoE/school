@@ -1,8 +1,8 @@
-import { IsString, IsNumber } from 'class-validator';
+import { IsString, IsNumber, IsUUID } from 'class-validator';
 
 export class CreateClassroomDto {
-  @IsNumber()
-  grade: number;
+  @IsUUID('4')
+  grade: string;
 
   @IsString()
   section: string;

@@ -67,7 +67,7 @@ export class StructureGradeService {
           status: Status.ACTIVO,
           id,
         },
-        relations: ['academicStructure'],
+        relations: ['academicStructure', 'grade'],
       });
       if (!structureGrade)
         throw new NotFoundException('Malla curricular grado not found');

@@ -121,16 +121,13 @@ export class UserService {
   }
 
   async findOne(id: string, role?: TypeUsers) {
-    const where: any = {
-      status: In[(Status.ACTIVO, Status.NO_MATRICULADO)],
-      id,
-    };
-    if (role) {
-      where.role = role;
-    }
     const user = await this.userRepository.findOne({
-      where,
-      relations: ['children', 'grade'],
+      where: {
+        status: In[(Status.ACTIVO, Status.NO_MATRICULADO)],
+        id,
+        ...(role && { role }),
+      },
+      relations: ['children', 'grade', 'classroom', 'children'],
     });
     if (!user) throw new NotFoundException('User Not Found');
     return user;
@@ -156,5 +153,17 @@ export class UserService {
     });
     await this.userRepository.save(user);
     return user;
+  }
+
+  async getStudents(ids: string[]) {
+    return this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.classroom', 'classroom')
+      .where('user.role = :role', { role: TypeUsers.STUDENT })
+      .andWhereInIds(ids)
+      .andWhere('user.status IN (:...status)', {
+        status: [Status.ACTIVO, Status.NO_MATRICULADO],
+      })
+      .getMany();
   }
 }

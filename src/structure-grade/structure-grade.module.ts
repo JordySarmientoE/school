@@ -6,6 +6,7 @@ import { StructureGrade } from './entities/structure-grade.entity';
 import { SubjectModule } from 'src/subject/subject.module';
 import { AcademicStructureModule } from 'src/academic-structure/academic-structure.module';
 import { GradeModule } from 'src/grade/grade.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   controllers: [StructureGradeController],
@@ -15,6 +16,7 @@ import { GradeModule } from 'src/grade/grade.module';
     SubjectModule,
     AcademicStructureModule,
     GradeModule,
+    AuthModule,
   ],
 })
 export class StructureGradeModule {}
