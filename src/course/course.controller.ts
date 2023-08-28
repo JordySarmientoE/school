@@ -6,14 +6,17 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { TypeUsers } from 'src/constants/roles';
 import { Auth } from 'src/auth/decorators/auth.decorator';
+import { UUIDDto } from 'src/helpers/dtos/uuid.dto';
+import { SearchCourseDto } from './dto/search-course.dto';
 
-@Auth(TypeUsers.ADMIN)
+//@Auth(TypeUsers.ADMIN)
 @Controller('course')
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
@@ -24,22 +27,22 @@ export class CourseController {
   }
 
   @Get()
-  findAll() {
-    return this.courseService.findAll();
+  findAll(@Query() searchCourseDto: SearchCourseDto) {
+    return this.courseService.findAll(searchCourseDto);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.courseService.findOne(+id);
+  findOne(@Param() params: UUIDDto) {
+    return this.courseService.findOne(params.id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCourseDto: UpdateCourseDto) {
-    return this.courseService.update(+id, updateCourseDto);
+  update(@Param() params: UUIDDto, @Body() updateCourseDto: UpdateCourseDto) {
+    return this.courseService.update(params.id, updateCourseDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.courseService.remove(+id);
+  remove(@Param() params: UUIDDto) {
+    return this.courseService.remove(params.id);
   }
 }

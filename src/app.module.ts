@@ -13,6 +13,7 @@ import { AcademicStructureModule } from './academic-structure/academic-structure
 import { ClassroomModule } from './classroom/classroom.module';
 import { StructureGradeModule } from './structure-grade/structure-grade.module';
 import { GradeModule } from './grade/grade.module';
+import { ScheduleModule } from './schedule/schedule.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -40,6 +41,7 @@ import { GradeModule } from './grade/grade.module';
     ClassroomModule,
     StructureGradeModule,
     GradeModule,
+    ScheduleModule,
   ],
 })
 export class AppModule {}

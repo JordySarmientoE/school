@@ -1,0 +1,14 @@
+# INSTALL NPM MODULES
+npm install
+
+# CREATE .env FILE
+# YOU CAN USE .env.example FILE AS AN EXAMPLE
+
+# RUN DOCKER COMPOSE
+# YOU NEED TO HAVE DOCKER INSTALL FIRST
+# RUN COMMAND
+docker-compose up -d
+
+# RUN PROJECT
+# RUN COMMAND
+npm run start:dev

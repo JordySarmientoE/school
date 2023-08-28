@@ -14,9 +14,10 @@ import { UpdateClassroomDto } from './dto/update-classroom.dto';
 import { SearchClassroomDto } from './dto/search-classroom.dto';
 import { TypeUsers } from 'src/constants/roles';
 import { Auth } from 'src/auth/decorators/auth.decorator';
-import { AssignStudentClassroomDto } from './dto/assign-student-classroomdto';
+import { AssignStudentClassroomDto } from './dto/assign-student-classroom.dto';
+import { AssignStructureDto } from './dto/assign-structure.dto';
 
-//@Auth(TypeUsers.ADMIN)
+@Auth(TypeUsers.ADMIN)
 @Controller('classroom')
 export class ClassroomController {
   constructor(private readonly classroomService: ClassroomService) {}
@@ -52,5 +53,10 @@ export class ClassroomController {
   @Post('assign-students')
   assignStudents(@Body() assignStudentClassroomDto: AssignStudentClassroomDto) {
     return this.classroomService.assignStudents(assignStudentClassroomDto);
+  }
+
+  @Post('assign-structure')
+  assignAcademicStructure(@Body() assignStructureDto: AssignStructureDto) {
+    return this.classroomService.assignAcademicStructure(assignStructureDto);
   }
 }

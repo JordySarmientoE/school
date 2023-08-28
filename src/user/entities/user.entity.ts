@@ -1,5 +1,6 @@
 import { Classroom } from 'src/classroom/entities/classroom.entity';
 import { Status, TypeUsers } from 'src/constants/roles';
+import { Course } from 'src/course/entities/course.entity';
 import { Grade } from 'src/grade/entities/grade.entity';
 import {
   Entity,
@@ -10,6 +11,9 @@ import {
   OneToOne,
   JoinColumn,
   ManyToOne,
+  ManyToMany,
+  OneToMany,
+  JoinTable,
 } from 'typeorm';
 
 @Entity()
@@ -76,6 +80,14 @@ export class User {
   @ManyToOne(() => Classroom)
   @JoinColumn({ name: 'classroom_id' })
   classroom: Classroom;
+
+  @OneToMany(() => Course, (course) => course.teacher)
+  @JoinColumn({ name: 'course_teacher_id' })
+  courseTeacher: Course[];
+
+  @ManyToMany(() => Course)
+  @JoinTable({ name: 'student_course_relation' })
+  courseStudent: Course[];
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

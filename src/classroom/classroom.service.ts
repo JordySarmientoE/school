@@ -13,8 +13,11 @@ import { SearchClassroomDto } from './dto/search-classroom.dto';
 import { Status } from 'src/constants/roles';
 import { GradeService } from 'src/grade/grade.service';
 import { StudentService } from 'src/student/student.service';
-import { AssignStudentClassroomDto } from './dto/assign-student-classroomdto';
+import { AssignStudentClassroomDto } from './dto/assign-student-classroom.dto';
 import { User } from 'src/user/entities/user.entity';
+import { AssignStructureDto } from './dto/assign-structure.dto';
+import { StructureGradeService } from 'src/structure-grade/structure-grade.service';
+import { AcademicStructureService } from 'src/academic-structure/academic-structure.service';
 
 @Injectable()
 export class ClassroomService {
@@ -25,6 +28,8 @@ export class ClassroomService {
     private readonly classroomRepository: Repository<Classroom>,
     private readonly gradeService: GradeService,
     private readonly studentService: StudentService,
+    private readonly structureGradeService: StructureGradeService,
+    private readonly academicStructureService: AcademicStructureService,
   ) {}
 
   async create(createClassroomDto: CreateClassroomDto) {
@@ -78,7 +83,7 @@ export class ClassroomService {
         where: {
           id,
         },
-        relations: ['grade', 'students'],
+        relations: ['grade', 'students', 'academicStructure'],
       });
       if (!classroom) throw new NotFoundException('Classroom not found');
       return classroom;
@@ -146,7 +151,26 @@ export class ClassroomService {
       estudiantes,
     );
     clase.students = studentsDifferents;
+    // TODO: Se debe insertar los cursos a los estudiantes
     await this.classroomRepository.save(clase);
     return clase;
+  }
+
+  async assignAcademicStructure(assignStructureDto: AssignStructureDto) {
+    const { academicStructure, grade, classroom } = assignStructureDto;
+    const [mallaCurricular, grado] = await Promise.all([
+      this.academicStructureService.findOne(academicStructure),
+      this.gradeService.findOne(grade),
+    ]);
+    const [classroomStructure, structureGrade] = await Promise.all([
+      this.classroomRepository.preload({
+        id: classroom,
+        academicStructure: mallaCurricular,
+      }),
+      this.structureGradeService.findOneByGrade(grado, mallaCurricular),
+    ]);
+    // TODO: Se tiene structureGrade para obtener los subject para insertar con course
+    await this.classroomRepository.save(classroomStructure);
+    return classroomStructure;
   }
 }

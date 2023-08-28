@@ -31,7 +31,7 @@ export class StructureGrade {
   @ManyToMany(() => Subject, (subject) => subject.structureGrade, {
     cascade: true,
   })
-  @JoinTable()
+  @JoinTable({ name: 'subject_structure_relation' })
   subject: Subject[];
 
   @ManyToOne(

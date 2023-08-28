@@ -18,5 +18,6 @@ import { AuthModule } from 'src/auth/auth.module';
     GradeModule,
     AuthModule,
   ],
+  exports: [StructureGradeService],
 })
 export class StructureGradeModule {}

@@ -1,3 +1,4 @@
+import { Classroom } from 'src/classroom/entities/classroom.entity';
 import { Status } from 'src/constants/roles';
 import { StructureGrade } from 'src/structure-grade/entities/structure-grade.entity';
 import {
@@ -34,6 +35,9 @@ export class AcademicStructure {
     (structureGrade) => structureGrade.academicStructure,
   )
   structureGrade: StructureGrade[];
+
+  @OneToMany(() => Classroom, (classroom) => classroom.academicStructure)
+  classroom: Classroom[];
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

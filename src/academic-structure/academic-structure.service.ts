@@ -47,7 +47,11 @@ export class AcademicStructureService {
           status: Status.ACTIVO,
           id,
         },
-        relations: ['structureGrade', 'structureGrade.subject'],
+        relations: [
+          'structureGrade',
+          'structureGrade.subject',
+          'structureGrade.grade',
+        ],
       });
       if (!academicStruc) throw new NotFoundException('Malla not found');
       return academicStruc;

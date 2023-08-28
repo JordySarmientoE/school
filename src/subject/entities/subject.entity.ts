@@ -1,4 +1,5 @@
 import { Status } from 'src/constants/roles';
+import { Course } from 'src/course/entities/course.entity';
 import { StructureGrade } from 'src/structure-grade/entities/structure-grade.entity';
 import {
   Entity,
@@ -6,6 +7,8 @@ import {
   Column,
   CreateDateColumn,
   ManyToMany,
+  OneToMany,
+  JoinTable,
 } from 'typeorm';
 
 @Entity()
@@ -36,7 +39,11 @@ export class Subject {
   hourPerWeek: number;
 
   @ManyToMany(() => StructureGrade, (structureGrade) => structureGrade.subject)
+  @JoinTable({ name: 'subject_structure_relation' })
   structureGrade: StructureGrade[];
+
+  @OneToMany(() => Course, (course) => course.subject)
+  course: Course[];
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
