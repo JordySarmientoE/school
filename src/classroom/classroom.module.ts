@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ClassroomService } from './classroom.service';
 import { ClassroomController } from './classroom.controller';
 import { AuthModule } from 'src/auth/auth.module';
@@ -6,8 +6,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Classroom } from './entities/classroom.entity';
 import { GradeModule } from 'src/grade/grade.module';
 import { StudentModule } from 'src/student/student.module';
-import { StructureGradeModule } from 'src/structure-grade/structure-grade.module';
 import { AcademicStructureModule } from 'src/academic-structure/academic-structure.module';
+import { CourseModule } from 'src/course/course.module';
+import { StudentCourseModule } from 'src/student-course/student-course.module';
 
 @Module({
   controllers: [ClassroomController],
@@ -17,8 +18,9 @@ import { AcademicStructureModule } from 'src/academic-structure/academic-structu
     TypeOrmModule.forFeature([Classroom]),
     GradeModule,
     StudentModule,
-    StructureGradeModule,
     AcademicStructureModule,
+    forwardRef(() => CourseModule),
+    StudentCourseModule,
   ],
   exports: [ClassroomService],
 })

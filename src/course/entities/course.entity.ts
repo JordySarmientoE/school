@@ -1,14 +1,14 @@
 import { Classroom } from 'src/classroom/entities/classroom.entity';
 import { Status } from 'src/constants/roles';
+import { StudentCourse } from 'src/student-course/entities/student-course.entity';
 import { Subject } from 'src/subject/entities/subject.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -41,9 +41,8 @@ export class Course {
   })
   status: string;
 
-  @ManyToMany(() => User, (student) => student.courseStudent)
-  @JoinTable({ name: 'student_course_relation' })
-  students: User[];
+  @OneToMany(() => StudentCourse, (studentCourse) => studentCourse.course)
+  students: StudentCourse[];
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

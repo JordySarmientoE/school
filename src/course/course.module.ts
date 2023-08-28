@@ -7,6 +7,8 @@ import { Course } from './entities/course.entity';
 import { ClassroomModule } from 'src/classroom/classroom.module';
 import { SubjectModule } from 'src/subject/subject.module';
 import { TeacherModule } from 'src/teacher/teacher.module';
+import { StudentCourseModule } from 'src/student-course/student-course.module';
+import { StudentModule } from 'src/student/student.module';
 
 @Module({
   controllers: [CourseController],
@@ -17,6 +19,9 @@ import { TeacherModule } from 'src/teacher/teacher.module';
     ClassroomModule,
     SubjectModule,
     TeacherModule,
+    StudentCourseModule,
+    StudentModule,
   ],
+  exports: [CourseService],
 })
 export class CourseModule {}

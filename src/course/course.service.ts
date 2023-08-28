@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,6 +14,12 @@ import { TeacherService } from 'src/teacher/teacher.service';
 import { SubjectService } from 'src/subject/subject.service';
 import { Status } from 'src/constants/roles';
 import { SearchCourseDto } from './dto/search-course.dto';
+import { InsertStudentCourseDto } from './dto/insert-student-course.dto';
+import { StudentCourseService } from 'src/student-course/student-course.service';
+import { StudentService } from 'src/student/student.service';
+import { Subject } from 'src/subject/entities/subject.entity';
+import { User } from 'src/user/entities/user.entity';
+import { Classroom } from 'src/classroom/entities/classroom.entity';
 
 @Injectable()
 export class CourseService {
@@ -20,6 +30,8 @@ export class CourseService {
     private readonly classroomService: ClassroomService,
     private readonly teacherService: TeacherService,
     private readonly subjectService: SubjectService,
+    private readonly studentCourseService: StudentCourseService,
+    private readonly studentService: StudentService,
   ) {}
 
   async create(createCourseDto: CreateCourseDto) {
@@ -32,6 +44,10 @@ export class CourseService {
           ? this.classroomService.findOne(classroom)
           : Promise.resolve(null),
       ]);
+      const subjectsPerClassroom =
+        salon?.courses.map((course) => course.subject.id) ?? [];
+      if (subjectsPerClassroom.includes(subject))
+        throw new BadRequestException('Classroom has this course');
       const course = this.courseRepository.create({
         hourPerWeek,
         subject: materia,
@@ -39,6 +55,13 @@ export class CourseService {
         ...(classroom && { classroom: salon }),
       });
       await this.courseRepository.save(course);
+      if (salon && salon.students.length > 0) {
+        const courses = [course];
+        await this.studentCourseService.insertStudentCourse(
+          courses,
+          salon.students,
+        );
+      }
       return course;
     } catch (error) {
       SendError(this.service, error);
@@ -77,7 +100,13 @@ export class CourseService {
           id,
           status: Status.ACTIVO,
         },
-        relations: ['subject', 'teacher', 'classroom', 'students'],
+        relations: [
+          'subject',
+          'teacher',
+          'classroom',
+          'students',
+          'students.student',
+        ],
       });
       if (!course) throw new NotFoundException('Course not found');
       return course;
@@ -88,13 +117,10 @@ export class CourseService {
 
   async update(id: string, updateCourseDto: UpdateCourseDto) {
     try {
-      const { hourPerWeek, classroom, teacher } = updateCourseDto;
+      const { hourPerWeek, teacher } = updateCourseDto;
       const course = await this.courseRepository.preload({
         id,
         ...(hourPerWeek && { hourPerWeek }),
-        ...(classroom && {
-          classroom: await this.classroomService.findOne(classroom),
-        }),
         ...(teacher && { teacher: await this.teacherService.findOne(teacher) }),
       });
       await this.courseRepository.save(course);
@@ -115,6 +141,69 @@ export class CourseService {
         status: 'OK',
         msg: 'Curso removido',
       };
+    } catch (error) {
+      SendError(this.service, error);
+    }
+  }
+
+  async assignStudents(insertStudentCourseDto: InsertStudentCourseDto) {
+    try {
+      const { students, course } = insertStudentCourseDto;
+      const validateLengthStudents = true;
+      const [curso, estudiantes] = await Promise.all([
+        this.findOne(course),
+        this.studentService.getStudents(students, validateLengthStudents),
+      ]);
+      const cursos = [curso];
+      await this.studentCourseService.insertStudentCourse(cursos, estudiantes);
+      return curso;
+    } catch (error) {
+      SendError(this.service, error);
+    }
+  }
+
+  getDifferentCourses(activeCourses: Course[], subjects: Subject[]): Subject[] {
+    const differentCourses = [];
+    subjects.forEach((subject) => {
+      const curso = activeCourses.find((c) => c.subject.id === subject.id);
+      if (!curso) differentCourses.push(subject);
+    });
+    return differentCourses;
+  }
+
+  async insertCourses(classroom: Classroom, subjects: Subject[]) {
+    try {
+      const courses = subjects.map((subject) => {
+        const course = new Course();
+        course.hourPerWeek = subject.hourPerWeek;
+        course.classroom = classroom;
+        course.subject = subject;
+        return course;
+      });
+      await this.courseRepository
+        .createQueryBuilder()
+        .insert()
+        .values(courses)
+        .execute();
+      return courses;
+    } catch (error) {
+      SendError(this.service, error);
+    }
+  }
+
+  async createCourses(
+    classroom: Classroom,
+    subjects: Subject[],
+    students: User[],
+  ) {
+    try {
+      const { courses: activeCourses } = classroom;
+      const differentCourses = this.getDifferentCourses(
+        activeCourses,
+        subjects,
+      );
+      const courses = await this.insertCourses(classroom, differentCourses);
+      await this.studentCourseService.insertStudentCourse(courses, students);
     } catch (error) {
       SendError(this.service, error);
     }

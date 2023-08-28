@@ -127,7 +127,13 @@ export class UserService {
         id,
         ...(role && { role }),
       },
-      relations: ['children', 'grade', 'classroom', 'children'],
+      relations: [
+        'children',
+        'grade',
+        'classroom',
+        'children',
+        'courseStudent',
+      ],
     });
     if (!user) throw new NotFoundException('User Not Found');
     return user;
@@ -159,6 +165,7 @@ export class UserService {
     return this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.classroom', 'classroom')
+      .leftJoinAndSelect('user.courseStudent', 'courseStudent')
       .where('user.role = :role', { role: TypeUsers.STUDENT })
       .andWhereInIds(ids)
       .andWhere('user.status IN (:...status)', {

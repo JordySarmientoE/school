@@ -10,8 +10,6 @@ import { AcademicStructureService } from 'src/academic-structure/academic-struct
 import { GradeService } from 'src/grade/grade.service';
 import { PaginationDto } from 'src/helpers/dtos/pagination.dto';
 import { Status } from 'src/constants/roles';
-import { Grade } from 'src/grade/entities/grade.entity';
-import { AcademicStructure } from 'src/academic-structure/entities/academic-structure.entity';
 import { Subject } from 'src/subject/entities/subject.entity';
 
 @Injectable()
@@ -67,7 +65,7 @@ export class StructureGradeService {
           status: Status.ACTIVO,
           id,
         },
-        relations: ['academicStructure', 'grade'],
+        relations: ['academicStructure', 'grade', 'subject'],
       });
       if (!structureGrade)
         throw new NotFoundException('Malla curricular grado not found');
@@ -92,20 +90,15 @@ export class StructureGradeService {
     }
   }
 
-  async findOneByGrade(grade: Grade, academicStructure: AcademicStructure) {
+  async findOneByGrade(grade: string, academicStructure: string) {
     try {
       const structureGrade = await this.academicRepository
         .createQueryBuilder('structureGrade')
-        .leftJoinAndSelect('structureGrade.grade', 'grade')
-        .leftJoinAndSelect(
-          'structureGrade.academicStructure',
-          'academicStructure',
-        )
         .leftJoinAndSelect('structureGrade.subject', 'subject')
-        .where('grade.id = :gradeId', { gradeId: grade.id })
+        .where('structureGrade.grade.id = :gradeId', { gradeId: grade })
         .andWhere('structureGrade.status = :status', { status: Status.ACTIVO })
-        .andWhere('academicStructure.id = :academicStructure', {
-          academicStructure: academicStructure.id,
+        .andWhere('structureGrade.academicStructure.id = :academicStructure', {
+          academicStructure: academicStructure,
         })
         .getOne();
       if (!structureGrade)
@@ -131,12 +124,10 @@ export class StructureGradeService {
     try {
       const { subjects, structure, grade } = addSubjectToStructureDto;
       const validateLengthCurses = true;
-      const [cursos, grado, mallaCurricular] = await Promise.all([
+      const [cursos, structureGrade] = await Promise.all([
         this.subjectService.getSubjects(subjects, validateLengthCurses),
-        this.gradeService.findOne(grade),
-        this.academicStructureService.findOne(structure),
+        this.findOneByGrade(grade, structure),
       ]);
-      const structureGrade = await this.findOneByGrade(grado, mallaCurricular);
       const cursosDiferentes = this.concatenateUniqueSubjects(
         structureGrade.subject,
         cursos,

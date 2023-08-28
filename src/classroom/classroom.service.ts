@@ -1,7 +1,9 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common';
 import { CreateClassroomDto } from './dto/create-classroom.dto';
 import { UpdateClassroomDto } from './dto/update-classroom.dto';
@@ -16,8 +18,9 @@ import { StudentService } from 'src/student/student.service';
 import { AssignStudentClassroomDto } from './dto/assign-student-classroom.dto';
 import { User } from 'src/user/entities/user.entity';
 import { AssignStructureDto } from './dto/assign-structure.dto';
-import { StructureGradeService } from 'src/structure-grade/structure-grade.service';
 import { AcademicStructureService } from 'src/academic-structure/academic-structure.service';
+import { CourseService } from 'src/course/course.service';
+import { StudentCourseService } from 'src/student-course/student-course.service';
 
 @Injectable()
 export class ClassroomService {
@@ -28,8 +31,10 @@ export class ClassroomService {
     private readonly classroomRepository: Repository<Classroom>,
     private readonly gradeService: GradeService,
     private readonly studentService: StudentService,
-    private readonly structureGradeService: StructureGradeService,
     private readonly academicStructureService: AcademicStructureService,
+    @Inject(forwardRef(() => CourseService))
+    private readonly courseService: CourseService,
+    private readonly studentCourseService: StudentCourseService,
   ) {}
 
   async create(createClassroomDto: CreateClassroomDto) {
@@ -47,29 +52,29 @@ export class ClassroomService {
   }
 
   async findAll(searchClassroomDto: SearchClassroomDto) {
-    const { limit = 10, offset = 0, grade } = searchClassroomDto;
-    let isFirstWhere = true;
+    const {
+      limit = 10,
+      offset = 0,
+      grade,
+      status = Status.ACTIVO,
+    } = searchClassroomDto;
+    let classrooms = this.classroomRepository
+      .createQueryBuilder('classroom')
+      .leftJoinAndSelect('classroom.grade', 'grade')
+      .where('classroom.status = :status', { status });
+
     const busqueda = {
       grade,
       section: searchClassroomDto.section,
       year: searchClassroomDto.year,
       status: searchClassroomDto.status,
     };
-    let classrooms = this.classroomRepository
-      .createQueryBuilder('classroom')
-      .leftJoinAndSelect('classroom.grade', 'grade');
 
     for (const key in busqueda) {
       if (busqueda[key]) {
-        let grado = undefined;
-        if (key === 'grade') {
-          grado = await this.gradeService.findOne(grade);
-        }
-        const queryWhere = isFirstWhere ? 'where' : 'andWhere';
-        classrooms = classrooms[queryWhere](`classroom.${key} = :${key}`, {
-          [key]: grado ? grado.id : busqueda[key],
+        classrooms = classrooms.andWhere(`classroom.${key} = :${key}`, {
+          [key]: busqueda[key],
         });
-        isFirstWhere = false;
       }
     }
 
@@ -83,7 +88,13 @@ export class ClassroomService {
         where: {
           id,
         },
-        relations: ['grade', 'students', 'academicStructure'],
+        relations: [
+          'grade',
+          'students',
+          'academicStructure',
+          'courses',
+          'courses.subject',
+        ],
       });
       if (!classroom) throw new NotFoundException('Classroom not found');
       return classroom;
@@ -135,12 +146,11 @@ export class ClassroomService {
 
   async assignStudents(assignStudentClassroomDto: AssignStudentClassroomDto) {
     const { students, classroom } = assignStudentClassroomDto;
-    const clase = await this.findOne(classroom);
     const validateLengthStudents = true;
-    const estudiantes = await this.studentService.getStudents(
-      students,
-      validateLengthStudents,
-    );
+    const [clase, estudiantes] = await Promise.all([
+      this.findOne(classroom),
+      this.studentService.getStudents(students, validateLengthStudents),
+    ]);
     const studentHasClassroom = estudiantes.find(
       (student) => student.classroom && student.classroom.id !== classroom,
     );
@@ -151,26 +161,27 @@ export class ClassroomService {
       estudiantes,
     );
     clase.students = studentsDifferents;
-    // TODO: Se debe insertar los cursos a los estudiantes
+    const { courses } = clase;
     await this.classroomRepository.save(clase);
+    if (courses.length > 0) {
+      await this.studentCourseService.insertStudentCourse(courses, estudiantes);
+    }
     return clase;
   }
 
   async assignAcademicStructure(assignStructureDto: AssignStructureDto) {
     const { academicStructure, grade, classroom } = assignStructureDto;
-    const [mallaCurricular, grado] = await Promise.all([
-      this.academicStructureService.findOne(academicStructure),
-      this.gradeService.findOne(grade),
+    const [clase, mallaCurricular] = await Promise.all([
+      this.findOne(classroom),
+      this.academicStructureService.findOneByGrade(academicStructure, grade),
     ]);
-    const [classroomStructure, structureGrade] = await Promise.all([
-      this.classroomRepository.preload({
-        id: classroom,
-        academicStructure: mallaCurricular,
-      }),
-      this.structureGradeService.findOneByGrade(grado, mallaCurricular),
-    ]);
-    // TODO: Se tiene structureGrade para obtener los subject para insertar con course
-    await this.classroomRepository.save(classroomStructure);
-    return classroomStructure;
+    clase.academicStructure = mallaCurricular;
+    const { students } = clase;
+    const { subject } = mallaCurricular.structureGrade[0];
+    await this.classroomRepository.save(clase);
+    if (subject.length > 0) {
+      await this.courseService.createCourses(clase, subject, students);
+    }
+    return clase;
   }
 }

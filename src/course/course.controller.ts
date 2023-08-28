@@ -15,6 +15,7 @@ import { TypeUsers } from 'src/constants/roles';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { UUIDDto } from 'src/helpers/dtos/uuid.dto';
 import { SearchCourseDto } from './dto/search-course.dto';
+import { InsertStudentCourseDto } from './dto/insert-student-course.dto';
 
 //@Auth(TypeUsers.ADMIN)
 @Controller('course')
@@ -44,5 +45,10 @@ export class CourseController {
   @Delete(':id')
   remove(@Param() params: UUIDDto) {
     return this.courseService.remove(params.id);
+  }
+
+  @Post('assign-student')
+  assignStudents(@Body() insertStudentCourseDto: InsertStudentCourseDto) {
+    return this.courseService.assignStudents(insertStudentCourseDto);
   }
 }

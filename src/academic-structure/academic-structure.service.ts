@@ -93,4 +93,23 @@ export class AcademicStructureService {
       SendError(this.service, error);
     }
   }
+
+  async findOneByGrade(structure: string, grade: string) {
+    try {
+      const academicStructure = await this.academicRepository
+        .createQueryBuilder('structure')
+        .leftJoinAndSelect('structure.structureGrade', 'structureGrade')
+        .leftJoinAndSelect('structureGrade.subject', 'subject')
+        .where('structure.status = :status', { status: Status.ACTIVO })
+        .andWhere('structureGrade.status = :status', { status: Status.ACTIVO })
+        .andWhere('structureGrade.grade.id = :grade', { grade })
+        .andWhere('structure.id = :structure', { structure })
+        .getOne();
+      if (academicStructure.structureGrade.length < 0)
+        throw new NotFoundException('Grado malla curricular not found');
+      return academicStructure;
+    } catch (error) {
+      SendError(this.service, error);
+    }
+  }
 }

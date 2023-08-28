@@ -3,11 +3,11 @@ import { IsNumber, IsOptional, IsUUID } from 'class-validator';
 export class CreateCourseDto {
   @IsOptional()
   @IsUUID('4')
-  classroom: string;
+  classroom?: string;
 
   @IsOptional()
   @IsUUID('4')
-  teacher: string;
+  teacher?: string;
 
   @IsNumber()
   hourPerWeek: number;
