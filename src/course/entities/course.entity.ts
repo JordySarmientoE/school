@@ -1,5 +1,6 @@
 import { Classroom } from 'src/classroom/entities/classroom.entity';
 import { Status } from 'src/constants/roles';
+import { Schedule } from 'src/schedule/entities/schedule.entity';
 import { StudentCourse } from 'src/student-course/entities/student-course.entity';
 import { Subject } from 'src/subject/entities/subject.entity';
 import { User } from 'src/user/entities/user.entity';
@@ -43,6 +44,9 @@ export class Course {
 
   @OneToMany(() => StudentCourse, (studentCourse) => studentCourse.course)
   students: StudentCourse[];
+
+  @OneToMany(() => Schedule, (schedule) => schedule.course)
+  schedules: Schedule[];
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

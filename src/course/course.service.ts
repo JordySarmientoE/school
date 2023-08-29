@@ -106,6 +106,7 @@ export class CourseService {
           'classroom',
           'students',
           'students.student',
+          'schedules',
         ],
       });
       if (!course) throw new NotFoundException('Course not found');
